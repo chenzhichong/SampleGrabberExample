@@ -14,6 +14,7 @@ public:
 	
 	SampleGrabberCallback();
 	BOOL SaveBitmap(BYTE * pBuffer, long lBufferSize ); //保存bitmap图片
+	BOOL SaveRaw(BYTE * pBuffer, long lBufferSize ); //保存一帧原始数据
 public:
 	BOOL m_bGetPicture;  // is get a picture
 	long m_lWidth;       //存储图片的宽度

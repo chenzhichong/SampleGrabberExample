@@ -13,6 +13,11 @@ public:
 	HRESULT SaveGraphToFile(WCHAR *wszPath);
 	HRESULT SetProperty(IBaseFilter* pFilter);
 	HRESULT SetGrabberProperty();
+	HRESULT SetCrossbarProperty();
+	HRESULT SetSampleGrabberProperty();
+	HRESULT Start();
+	HRESULT Pause();
+	HRESULT Stop();
 	//HRESULT EnumAllDevices(HWND hCombox);  //Enumeration all devices
 	void CloseInterface(); //close all interface
 	//HRESULT OpenDevice(int deviceID, LONG nLeft, LONG nTop, LONG nWide, LONG nHeight);
@@ -28,6 +33,7 @@ private:
 	IMediaControl *m_pMediaControl;
 	IBaseFilter *m_pGrabberDevFilter;
 	IBaseFilter *m_pCrossbarFilter;
+	IBaseFilter *m_pSampGrabberFilter;
 	ISampleGrabber *m_pSampGrabber;
 	IBaseFilter *m_pRenderFilter;
 	//IMediaEventEx *m_pMediaEvent;

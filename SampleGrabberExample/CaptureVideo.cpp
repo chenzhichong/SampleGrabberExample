@@ -1,13 +1,12 @@
 #include "CaptureVideo.h"
 
-//SampleGrabberCallback g_sampleGrabberCB;  //CallBack
+SampleGrabberCallback g_sampleGrabberCB;  //CallBack
 
 CaptureVideo::CaptureVideo()
 {
 	//COM Library Initialize
 	if (FAILED(CoInitialize(NULL)))
 	{
-		//Msg(m_App,TEXT("CoInitialize Failed!\r\n"));
 		printf("CoInitialize Failed!\n");
 		return;
 	}
@@ -20,6 +19,7 @@ CaptureVideo::CaptureVideo()
 	m_pGraphBuilder = NULL;
 	m_pMediaControl = NULL;
 	//m_pMediaEvent = NULL;
+	m_pSampGrabberFilter = NULL;
 	m_pSampGrabber = NULL;
 	//m_pVideoWindow = NULL;
 	//m_App = NULL;
@@ -148,6 +148,27 @@ HRESULT CaptureVideo::InitializeEnv()
 		return hr;
 	}
 
+	//add SampleGrabber
+	hr = CoCreateInstance(CLSID_SampleGrabber, NULL, CLSCTX_INPROC_SERVER,
+		IID_IBaseFilter, (LPVOID*)&m_pSampGrabberFilter);
+	if(FAILED(hr))
+	{
+		printf("´´½¨SampleGrabber FilterÊ§°Ü£¡");
+		return hr;
+	}
+	hr = m_pGraphBuilder->AddFilter(m_pSampGrabberFilter, L"SampleGrabber");
+	if(FAILED(hr))
+	{
+		printf("Ìí¼ÓSampleGrabber FilterÊ§°Ü£¡");
+		return hr;
+	} 
+	hr = m_pSampGrabberFilter->QueryInterface(IID_ISampleGrabber, (LPVOID*)&m_pSampGrabber);
+	if (FAILED(hr))
+	{
+		printf("²éÑ¯ISampleGrabber½Ó¿ÚÊ§°Ü£¡");
+		return hr;
+	}	
+
 	//add Null Renderer
 	hr = CoCreateInstance(CLSID_NullRenderer, NULL, CLSCTX_INPROC_SERVER,
 		IID_IBaseFilter, (LPVOID*)&m_pRenderFilter);
@@ -189,11 +210,35 @@ HRESULT CaptureVideo::InitializeEnv()
 	SafeRelease(&pPinOut);
 	SafeRelease(&pPinIn);
 
-	//connect SM BDA Crossbar Filter and SMI Grabber Device
+	//connect SMI Grabber Device and SampleGrabber
 	hr = GetPin(m_pGrabberDevFilter, L"Capture Out", &pPinOut);
 	if(FAILED(hr))
 	{
 		printf("[Capture Out],GetPinÊ§°Ü£¡");
+		return hr;
+	}
+	hr = GetPin(m_pSampGrabberFilter, L"Input", &pPinIn);
+	if(FAILED(hr))
+	{
+		printf("[Input],GetPinÊ§°Ü£¡");
+		return hr;
+	}
+	hr = m_pGraphBuilder->ConnectDirect(pPinOut, pPinIn, NULL);
+	if(FAILED(hr))
+	{
+		printf("Á¬½ÓÊ§°Ü£¡");
+		SafeRelease(&pPinOut);
+		SafeRelease(&pPinIn);
+		return hr;
+	}
+	SafeRelease(&pPinOut);
+	SafeRelease(&pPinIn);
+
+	//connect SampleGrabber and Null Render
+	hr = GetPin(m_pSampGrabberFilter, L"Output", &pPinOut);
+	if(FAILED(hr))
+	{
+		printf("[Output],GetPinÊ§°Ü£¡");
 		return hr;
 	}
 	hr = GetPin(m_pRenderFilter, L"In", &pPinIn);
@@ -355,6 +400,76 @@ HRESULT CaptureVideo::SetGrabberProperty()
 	}
 	return hr;
 }
+
+HRESULT CaptureVideo::SetCrossbarProperty()
+{
+	HRESULT hr = S_OK;
+	hr = ShowFilterPropertyPage(m_pCrossbarFilter, NULL);
+	if (FAILED(hr))
+	{
+		printf("ÏÔÊ¾CrossbarÊôÐÔ¶Ô»°¿òÊ§°Ü£¡");
+		return hr;
+	}
+	return hr;
+}
+
+HRESULT CaptureVideo::SetSampleGrabberProperty()
+{
+	HRESULT hr = S_OK;
+	if (!m_pSampGrabber)
+		return E_POINTER;
+
+	AM_MEDIA_TYPE mt;
+	ZeroMemory(&mt, sizeof(mt));
+	mt.majortype = MEDIATYPE_Video;
+	mt.subtype = MEDIASUBTYPE_UYVY;
+
+	hr = m_pSampGrabber->SetMediaType(&mt);
+	if (FAILED(hr))
+	{
+		printf("ÉèÖÃsample¸ñÊ½Ê§°Ü£¡");
+		return hr;
+	}
+	hr = m_pSampGrabber->SetBufferSamples(TRUE);
+	if (FAILED(hr))
+	{
+		printf("ÉèÖÃbufferÊ§°Ü£¡");
+		return hr;
+	}
+	hr = m_pSampGrabber->SetCallback(&g_sampleGrabberCB, 1);
+	if (FAILED(hr))
+	{
+		printf("ÉèÖÃcallbackÊ§°Ü£¡");
+		return hr;
+	}
+	return hr;
+}
+
+HRESULT CaptureVideo::Start()
+{
+	HRESULT hr = S_OK;
+	if (!m_pMediaControl)
+		return E_POINTER;
+	hr = m_pMediaControl->Run();
+	return hr;
+}
+HRESULT CaptureVideo::Pause()
+{
+	HRESULT hr = S_OK;
+	if (!m_pMediaControl)
+		return E_POINTER;
+	hr = m_pMediaControl->Pause();
+	return hr;
+}
+HRESULT CaptureVideo::Stop()
+{
+	HRESULT hr = S_OK;
+	if (!m_pMediaControl)
+		return E_POINTER;
+	hr = m_pMediaControl->Stop();
+	return hr;
+}
+
 
 void CaptureVideo::CloseInterface()
 {
@@ -553,7 +668,7 @@ void CaptureVideo::CloseInterface()
 
 void CaptureVideo::GrabOneFrame(BOOL bGrab)
 {
-	m_bGetOneShot = bGrab;
+	//m_bGetOneShot = bGrab;
 	//g_sampleGrabberCB.m_bGetPicture = bGrab;
 }
 
