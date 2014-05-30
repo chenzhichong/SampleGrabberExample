@@ -1,14 +1,14 @@
 #include "SampleGrabberCallback.h"
 
-SampleGrabberCallback::SampleGrabberCallback(int width, int height)
+SampleGrabberCallback::SampleGrabberCallback()
 {
 	m_bGetPicture = TRUE;
 	//Get template path
 	GetTempPath(MAX_PATH,m_chTempPath);
 	StringCchCat(m_chTempPath,MAX_PATH,TEXT("SGPic"));
 	CreateDirectory(m_chTempPath,NULL);
-	m_lWidth = width;
-	m_lHeight = height;
+	m_lWidth = 0;
+	m_lHeight = 0;
 	m_iBitCount = 24;
 	m_lTotalFrame = 0;
 }

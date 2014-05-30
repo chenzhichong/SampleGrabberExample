@@ -13,7 +13,7 @@ public:
 	HRESULT STDMETHODCALLTYPE SampleCB(double Time, IMediaSample *pSample);
 	HRESULT STDMETHODCALLTYPE BufferCB(double Time, BYTE *pBuffer, long BufferLen);
 	
-	SampleGrabberCallback(int width, int height);
+	SampleGrabberCallback();
 	BOOL SaveBitmap(BYTE * pBuffer, long lBufferSize ); //保存bitmap图片
 	BOOL SaveRaw(BYTE * pBuffer, long lBufferSize ); //保存一帧原始数据
 public:

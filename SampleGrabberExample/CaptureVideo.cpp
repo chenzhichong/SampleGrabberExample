@@ -120,31 +120,31 @@ HRESULT CaptureVideo::InitializeEnv()
 	if(FAILED(hr))
 		return hr;
 
-	//add Grabber devcie 
-	hr = CreateFilterByName(L"SMI Grabber Device", CLSID_VideoCaptureSources, &m_pGrabberDevFilter);
+	//add Capture devcie 
+	hr = CreateFilterByName(CAPTURE_DEVICE_NAME[WHICH_DEVICE], CLSID_VideoCaptureSources, &m_pGrabberDevFilter);
 	if(FAILED(hr))
 	{
-		printf("´´½¨SMI Grabber DeviceÊ§°Ü£¡");
+		printf("´´½¨%lsÊ§°Ü£¡\n", CAPTURE_DEVICE_NAME[WHICH_DEVICE]);
 		return hr;
 	}
-	hr = m_pGraphBuilder->AddFilter(m_pGrabberDevFilter, L"SMI Grabber Device");
+	hr = m_pGraphBuilder->AddFilter(m_pGrabberDevFilter, CAPTURE_DEVICE_NAME[WHICH_DEVICE]);
 	if(FAILED(hr))
 	{
-		printf("Ìí¼ÓSMI Grabber DeviceÊ§°Ü£¡");
+		printf("Ìí¼Ó%lsÊ§°Ü£¡\n", CAPTURE_DEVICE_NAME[WHICH_DEVICE]);
 		return hr;
 	}
 
 	//add SM BDA Crossbar Filter 
-	hr = CreateFilterByName(L"SM BDA Crossbar Filter", CLSID_WDM, &m_pCrossbarFilter);
+	hr = CreateFilterByName(CROSSBAR_DEVICE_NAME[WHICH_DEVICE], CLSID_WDM, &m_pCrossbarFilter);
 	if(FAILED(hr))
 	{
-		printf("´´½¨SM BDA Crossbar FilterÊ§°Ü£¡");
+		printf("´´½¨%lsÊ§°Ü£¡\n", CROSSBAR_DEVICE_NAME[WHICH_DEVICE]);
 		return hr;
 	}
-	hr = m_pGraphBuilder->AddFilter(m_pCrossbarFilter, L"SM BDA Crossbar Filter");
+	hr = m_pGraphBuilder->AddFilter(m_pCrossbarFilter, CROSSBAR_DEVICE_NAME[WHICH_DEVICE]);
 	if(FAILED(hr))
 	{
-		printf("Ìí¼ÓSM BDA Crossbar FilterÊ§°Ü£¡");
+		printf("Ìí¼Ó%lsÊ§°Ü£¡\n");
 		return hr;
 	}
 
@@ -153,19 +153,19 @@ HRESULT CaptureVideo::InitializeEnv()
 		IID_IBaseFilter, (LPVOID*)&m_pSampGrabberFilter);
 	if(FAILED(hr))
 	{
-		printf("´´½¨SampleGrabber FilterÊ§°Ü£¡");
+		printf("´´½¨SampleGrabber FilterÊ§°Ü£¡\n");
 		return hr;
 	}
 	hr = m_pGraphBuilder->AddFilter(m_pSampGrabberFilter, L"SampleGrabber");
 	if(FAILED(hr))
 	{
-		printf("Ìí¼ÓSampleGrabber FilterÊ§°Ü£¡");
+		printf("Ìí¼ÓSampleGrabber FilterÊ§°Ü£¡\n");
 		return hr;
 	} 
 	hr = m_pSampGrabberFilter->QueryInterface(IID_ISampleGrabber, (LPVOID*)&m_pSampGrabber);
 	if (FAILED(hr))
 	{
-		printf("²éÑ¯ISampleGrabber½Ó¿ÚÊ§°Ü£¡");
+		printf("²éÑ¯ISampleGrabber½Ó¿ÚÊ§°Ü£¡\n");
 		return hr;
 	}	
 
@@ -174,35 +174,35 @@ HRESULT CaptureVideo::InitializeEnv()
 		IID_IBaseFilter, (LPVOID*)&m_pRenderFilter);
 	if(FAILED(hr))
 	{
-		printf("´´½¨Null Renderer FilterÊ§°Ü£¡");
+		printf("´´½¨Null Renderer FilterÊ§°Ü£¡\n");
 		return hr;
 	}
 	hr = m_pGraphBuilder->AddFilter(m_pRenderFilter, L"Null Renderer");
 	if(FAILED(hr))
 	{
-		printf("Ìí¼ÓNull Renderer FilterÊ§°Ü£¡");
+		printf("Ìí¼ÓNull Renderer FilterÊ§°Ü£¡\n");
 		return hr;
 	}
 
 	//connect SM BDA Crossbar Filter and SMI Grabber Device
 	IPin *pPinOut = NULL;
 	IPin *pPinIn = NULL;
-	hr = GetPin(m_pCrossbarFilter, L"0: Video Decoder Out", &pPinOut);
+	hr = GetPin(m_pCrossbarFilter, CROSSBAR_DEVICE_PIN_OUT_NAME[WHICH_DEVICE], &pPinOut);
 	if(FAILED(hr))
 	{
-		printf("[0: Video Decoder Out],GetPinÊ§°Ü£¡");
+		printf("GetPin[%ls:%ls]Ê§°Ü£¡\n", CROSSBAR_DEVICE_NAME[WHICH_DEVICE], CROSSBAR_DEVICE_PIN_OUT_NAME[WHICH_DEVICE]);
 		return hr;
 	}
-	hr = GetPin(m_pGrabberDevFilter, L"Video Tuner In", &pPinIn);
+	hr = GetPin(m_pGrabberDevFilter, CAPTURE_DEVICE_VEDIO_PIN_IN_NAME[WHICH_DEVICE], &pPinIn);
 	if(FAILED(hr))
 	{
-		printf("[Video Tuner In],GetPinÊ§°Ü£¡");
+		printf("GetPin[%ls:%ls]Ê§°Ü£¡\n", CAPTURE_DEVICE_NAME[WHICH_DEVICE], CAPTURE_DEVICE_VEDIO_PIN_IN_NAME[WHICH_DEVICE]);
 		return hr;
 	}
 	hr = m_pGraphBuilder->ConnectDirect(pPinOut, pPinIn, NULL);
 	if(FAILED(hr))
 	{
-		printf("Á¬½ÓÊ§°Ü£¡");
+		printf("Á¬½ÓÊ§°Ü£¡\n");
 		SafeRelease(&pPinOut);
 		SafeRelease(&pPinIn);
 		return hr;
@@ -211,22 +211,22 @@ HRESULT CaptureVideo::InitializeEnv()
 	SafeRelease(&pPinIn);
 
 	//connect SMI Grabber Device and SampleGrabber
-	hr = GetPin(m_pGrabberDevFilter, L"Capture Out", &pPinOut);
+	hr = GetPin(m_pGrabberDevFilter,CAPTURE_DEVICE_VEDIO_PIN_OUT_NAME[WHICH_DEVICE], &pPinOut);
 	if(FAILED(hr))
 	{
-		printf("[Capture Out],GetPinÊ§°Ü£¡");
+		printf("GetPin[%ls:%ls]Ê§°Ü£¡\n", CAPTURE_DEVICE_NAME[WHICH_DEVICE], CAPTURE_DEVICE_VEDIO_PIN_OUT_NAME[WHICH_DEVICE]);
 		return hr;
 	}
 	hr = GetPin(m_pSampGrabberFilter, L"Input", &pPinIn);
 	if(FAILED(hr))
 	{
-		printf("[Input],GetPinÊ§°Ü£¡");
+		printf("GetPin[%ls:%ls]Ê§°Ü£¡\n", L"SampleGrabber", L"Input");
 		return hr;
 	}
 	hr = m_pGraphBuilder->ConnectDirect(pPinOut, pPinIn, NULL);
 	if(FAILED(hr))
 	{
-		printf("Á¬½ÓÊ§°Ü£¡");
+		printf("Á¬½ÓÊ§°Ü£¡\n");
 		SafeRelease(&pPinOut);
 		SafeRelease(&pPinIn);
 		return hr;
@@ -238,19 +238,19 @@ HRESULT CaptureVideo::InitializeEnv()
 	hr = GetPin(m_pSampGrabberFilter, L"Output", &pPinOut);
 	if(FAILED(hr))
 	{
-		printf("[Output],GetPinÊ§°Ü£¡");
+		printf("GetPin[%ls:%ls]Ê§°Ü£¡\n", L"SampleGrabber", L"Output");
 		return hr;
 	}
 	hr = GetPin(m_pRenderFilter, L"In", &pPinIn);
 	if(FAILED(hr))
 	{
-		printf("[In],GetPinÊ§°Ü£¡");
+		printf("GetPin[%ls:%ls]Ê§°Ü£¡\n", L"Null Render", L"In");
 		return hr;
 	}
 	hr = m_pGraphBuilder->ConnectDirect(pPinOut, pPinIn, NULL);
 	if(FAILED(hr))
 	{
-		printf("Á¬½ÓÊ§°Ü£¡");
+		printf("Á¬½ÓÊ§°Ü£¡\n");
 		SafeRelease(&pPinOut);
 		SafeRelease(&pPinIn);
 		return hr;
@@ -395,7 +395,7 @@ HRESULT CaptureVideo::SetGrabberProperty()
 	hr = ShowFilterPropertyPage(m_pGrabberDevFilter, NULL);
 	if (FAILED(hr))
 	{
-		printf("ÏÔÊ¾GrabberDevFilterÊôÐÔ¶Ô»°¿òÊ§°Ü£¡");
+		printf("ÏÔÊ¾GrabberDevFilterÊôÐÔ¶Ô»°¿òÊ§°Ü£¡\n");
 		return hr;
 	}
 	return hr;
@@ -407,7 +407,7 @@ HRESULT CaptureVideo::SetCrossbarProperty()
 	hr = ShowFilterPropertyPage(m_pCrossbarFilter, NULL);
 	if (FAILED(hr))
 	{
-		printf("ÏÔÊ¾CrossbarÊôÐÔ¶Ô»°¿òÊ§°Ü£¡");
+		printf("ÏÔÊ¾CrossbarÊôÐÔ¶Ô»°¿òÊ§°Ü£¡\n");
 		return hr;
 	}
 	return hr;
