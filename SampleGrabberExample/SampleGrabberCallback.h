@@ -1,6 +1,7 @@
 #ifndef __SAMPLEGRABBERCALLBACK_H__
 #define __SAMPLEGRABBERCALLBACK_H__
 #include "common.h"
+#include "CUYVY2BMP.h"
 
 class SampleGrabberCallback : public ISampleGrabberCB
 {
@@ -24,6 +25,7 @@ public:
 	TCHAR m_chSwapStr[MAX_PATH];
 	TCHAR m_chDirName[MAX_PATH];
 	long m_lTotalFrame;
+	//CUYVY2BMP m_CUYVY2BMP;
 };
 
 #endif //__SAMPLEGRABBERCALLBACK_H__

@@ -27,6 +27,9 @@
     <ClCompile Include="common.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CUYVY2BMP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SampleGrabberCallback.h">
@@ -36,6 +39,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CaptureVideo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CUYVY2BMP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

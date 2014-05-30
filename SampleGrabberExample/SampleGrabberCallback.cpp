@@ -50,6 +50,7 @@ HRESULT STDMETHODCALLTYPE SampleGrabberCallback::SampleCB(double Time, IMediaSam
 HRESULT STDMETHODCALLTYPE SampleGrabberCallback::BufferCB(double Time, BYTE *pBuffer, long BufferLen)
 {
 	m_lTotalFrame++;
+	CUYVY2BMP CUYVY2BMP(m_lWidth, m_lHeight);
 	printf("[%s]:Frame[%d]\n", __FUNCTION__, m_lTotalFrame);
 	if(FALSE == m_bGetPicture)  //≈–∂œ «∑Ò–Ë“™ΩÿÕº
 		return S_FALSE;

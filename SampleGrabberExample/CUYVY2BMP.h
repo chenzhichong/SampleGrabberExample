@@ -1,10 +1,7 @@
 #ifndef __CUYVY2BMP_H__  
 #define __CUYVY2BMP_H__  
 
-#include <windows.h>  
-#include <malloc.h>  
-#include <string>  
-using namespace std;
+#include "common.h"
 #define clip(min, x, max) x=(x < min) ? min : (x > max) ? max : x
 
 typedef struct tagTABLE_UYVY2RGB
@@ -27,6 +24,8 @@ public:
 	///accessor 
 	int CUYVY2BMP::GetHeight();
 	int CUYVY2BMP::GetWidth();
+	void CUYVY2BMP::SetHeight(int val);
+	void CUYVY2BMP::SetWidth(int val);
 	void MakeConversionTable();
 	BOOL UYVY2BMP(BYTE* pDst, BYTE *pSrc);
 	BOOL WriteBMPFile(PCWSTR BMPFilename, BYTE *pRGBBuf, int iBitCount);
