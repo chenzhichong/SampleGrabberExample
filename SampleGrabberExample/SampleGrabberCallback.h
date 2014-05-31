@@ -14,6 +14,7 @@ public:
 	HRESULT STDMETHODCALLTYPE BufferCB(double Time, BYTE *pBuffer, long BufferLen);
 	
 	SampleGrabberCallback();
+	HRESULT ConvertYUY2ToYUV420(BYTE *pSrc, BYTE *pDst, int iWidth, int iHeight);
 	BOOL SaveBitmap(BYTE * pBuffer, long lBufferSize ); //保存bitmap图片
 	BOOL SaveRaw(BYTE * pBuffer, long lBufferSize ); //保存一帧原始数据
 public:

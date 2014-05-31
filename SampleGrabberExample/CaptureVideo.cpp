@@ -307,7 +307,7 @@ HRESULT CaptureVideo::CreateFilterByName(PCWSTR pszFilterName, const GUID& clsid
 						{
 							printf("Can't bind moniker to filter object.\n");
 						}
-						printf("Success bind moniker [%s] to filter object.\n", pszFilterName);
+						printf("Success bind moniker [%ls] to filter object.\n", pszFilterName);
 						pPropBag->Release();
 						pMoniker->Release();
 						pEnumCat->Release();
@@ -422,7 +422,7 @@ HRESULT CaptureVideo::SetSampleGrabberProperty()
 	AM_MEDIA_TYPE mt;
 	ZeroMemory(&mt, sizeof(mt));
 	mt.majortype = MEDIATYPE_Video;
-	mt.subtype = MEDIASUBTYPE_UYVY;
+	mt.subtype = MEDIASUBTYPE_YUY2;
 
 	hr = m_pSampGrabber->SetMediaType(&mt);
 	if (FAILED(hr))

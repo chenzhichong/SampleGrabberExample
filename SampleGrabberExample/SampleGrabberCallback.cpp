@@ -7,8 +7,8 @@ SampleGrabberCallback::SampleGrabberCallback()
 	GetTempPath(MAX_PATH,m_chTempPath);
 	StringCchCat(m_chTempPath,MAX_PATH,TEXT("SGPic"));
 	CreateDirectory(m_chTempPath,NULL);
-	m_lWidth = 0;
-	m_lHeight = 0;
+	m_lWidth = 720;
+	m_lHeight = 576;
 	m_iBitCount = 24;
 	m_lTotalFrame = 0;
 }
@@ -108,11 +108,11 @@ BOOL SampleGrabberCallback::SaveBitmap(BYTE * pBuffer, long lBufferSize )
 
 BOOL SampleGrabberCallback::SaveRaw(BYTE * pBuffer, long lBufferSize )
 {
-	printf("[%s]:hello\n", __FUNCTION__);
+	//printf("[%s]:hello\n", __FUNCTION__);
 	SYSTEMTIME sysTime;
 	GetLocalTime(&sysTime);
 	StringCchCopy(m_chSwapStr,MAX_PATH,m_chTempPath);
-	StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03ione.uyvy"),
+	StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03ione.yuy2"),
 					sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
 					sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
 	StringCchCat(m_chSwapStr,MAX_PATH,m_chDirName);
@@ -145,8 +145,46 @@ BOOL SampleGrabberCallback::SaveRaw(BYTE * pBuffer, long lBufferSize )
 	WriteFile( hf, &bih, sizeof( bih ), &dwWritten, NULL );
 	*/
 	//Write the file Data
+	BYTE *pYUV420Buffer;
+	long YUV420BufferSize = m_lWidth*m_lHeight*1.5;
+	pYUV420Buffer = (BYTE*) malloc(YUV420BufferSize);
+	ZeroMemory(pYUV420Buffer, YUV420BufferSize);
+	ConvertYUY2ToYUV420(pBuffer, pYUV420Buffer, m_lWidth, m_lHeight);
 	DWORD dwWritten = 0;
-	WriteFile( hf, pBuffer, lBufferSize, &dwWritten, NULL );
-	CloseHandle( hf );
+	//WriteFile(hf, pBuffer, lBufferSize, &dwWritten, NULL);
+	WriteFile(hf, pYUV420Buffer, YUV420BufferSize, &dwWritten, NULL);
+	free(pYUV420Buffer);
+	CloseHandle(hf);
 	return 0;
+}
+HRESULT SampleGrabberCallback::ConvertYUY2ToYUV420(BYTE *pSrc, BYTE *pDst, int iWidth, int iHeight)
+{
+	if (!pDst && !pSrc)
+		return E_POINTER;
+	int iImgSize = iWidth * iHeight * 2;
+	int iWidthStep422 = iWidth * 2;
+
+	const BYTE* p422 = pSrc;
+	BYTE* p420y = pDst;
+	BYTE* p420u = pDst + iImgSize / 2; 
+	BYTE* p420v = p420u + iImgSize / 8;
+
+	for(int i = 0; i < iHeight; i += 2)
+	{
+		p422 = pSrc + i * iWidthStep422;
+		for(int j = 0; j < iWidthStep422; j+=4)
+		{
+			*(p420y++) = p422[j];
+			*(p420u++) = p422[j+1];
+			*(p420y++) = p422[j+2];
+		}
+		p422 += iWidthStep422;
+		for(int j = 0; j < iWidthStep422; j+=4)
+		{
+			*(p420y++) = p422[j];
+			*(p420v++) = p422[j+3];
+			*(p420y++) = p422[j+2];
+		}
+	}
+	return S_OK;
 }
