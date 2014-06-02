@@ -11,6 +11,10 @@ SampleGrabberCallback::SampleGrabberCallback()
 	m_lHeight = 576;
 	m_iBitCount = 24;
 	m_lTotalFrame = 0;
+	//初始化编码库
+	m_Encodec.Initialzie(m_lHeight,m_lWidth,X264FrameCallBack);
+	//初始化RTP库
+	m_RTPRecv.Initialize(RTP_RECV_PORT,RTPFrameCallBack);
 }
 
 ULONG STDMETHODCALLTYPE SampleGrabberCallback::AddRef()
@@ -50,7 +54,8 @@ HRESULT STDMETHODCALLTYPE SampleGrabberCallback::SampleCB(double Time, IMediaSam
 HRESULT STDMETHODCALLTYPE SampleGrabberCallback::BufferCB(double Time, BYTE *pBuffer, long BufferLen)
 {
 	m_lTotalFrame++;
-	CUYVY2BMP CUYVY2BMP(m_lWidth, m_lHeight);
+	//CUYVY2BMP CUYVY2BMP(m_lWidth, m_lHeight);
+	
 	printf("[%s]:Frame[%d]\n", __FUNCTION__, m_lTotalFrame);
 	if(FALSE == m_bGetPicture)  //判断是否需要截图
 		return S_FALSE;
@@ -58,7 +63,8 @@ HRESULT STDMETHODCALLTYPE SampleGrabberCallback::BufferCB(double Time, BYTE *pBu
 		return E_POINTER;
 
 	//SaveBitmap(pBuffer,BufferLen);
-	SaveRaw(pBuffer, BufferLen);
+	//SaveRaw(pBuffer, BufferLen);
+	HandleRaw(pBuffer, BufferLen);
 
 	//m_bGetPicture = FALSE;
 	return S_OK;
@@ -157,7 +163,7 @@ BOOL SampleGrabberCallback::SaveRaw(BYTE * pBuffer, long lBufferSize )
 	CloseHandle(hf);
 	return 0;
 }
-HRESULT SampleGrabberCallback::ConvertYUY2ToYUV420(BYTE *pSrc, BYTE *pDst, int iWidth, int iHeight)
+HRESULT SampleGrabberCallback::ConvertYUY2ToYUV420(BYTE *pSrc, BYTE *pDst, int iWidth, int iHeight )
 {
 	if (!pDst && !pSrc)
 		return E_POINTER;
@@ -188,3 +194,27 @@ HRESULT SampleGrabberCallback::ConvertYUY2ToYUV420(BYTE *pSrc, BYTE *pDst, int i
 	}
 	return S_OK;
 }
+int SampleGrabberCallback::X264FrameCallBack(int FrameType, void *pData, int Length, void *pContext)
+{
+	printf("[%s:]%ls\n", __FUNCTION__, L"send x264!");
+	SampleGrabberCallback *pSGC = static_cast<SampleGrabberCallback*>(pContext);
+	//将本地编码的视频发送出去
+	pSGC->m_RTPRecv.SendH264Nalu((unsigned char*)pData,Length);
+	return 1;
+}
+int SampleGrabberCallback::RTPFrameCallBack(int FrameType, void *pData, int Length, void *pContext)
+{
+	printf("[%s:]%ls\n", __FUNCTION__, L"do nothing!");
+	return 1;
+}
+BOOL SampleGrabberCallback::HandleRaw(BYTE * pBuffer, long lBufferSize )
+{
+	BYTE *pYUV420Buffer;
+	long YUV420BufferSize = m_lWidth*m_lHeight*1.5;
+	pYUV420Buffer = (BYTE*) malloc(YUV420BufferSize);
+	ZeroMemory(pYUV420Buffer, YUV420BufferSize);
+	ConvertYUY2ToYUV420(pBuffer, pYUV420Buffer, m_lWidth, m_lHeight);
+	m_Encodec.InsertImageData(pYUV420Buffer, YUV420BufferSize);
+	return TRUE;
+}
+

@@ -30,6 +30,12 @@
     <ClCompile Include="CUYVY2BMP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="H264Encoderc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RTPRecv.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SampleGrabberCallback.h">
@@ -42,6 +48,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CUYVY2BMP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="H264Encoderc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RTPRecv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="x264-RTP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="x264.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
