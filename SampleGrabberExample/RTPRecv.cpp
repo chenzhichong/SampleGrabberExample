@@ -83,10 +83,11 @@ int CRTPRecv::Initialize(int Port, FRAME_CALLBACK pCallBack)
 		LOG_ERROR("CreateThread ERROR");
 		exit(-1);
 	000000}
-	//测试使用
-	RTPIPv4Address addr(ntohl(inet_addr("172.19.20.29")),RTP_RECV_PORT);
-	AddDestination(addr);
 	*/
+	//测试使用
+	RTPIPv4Address addr(ntohl(inet_addr("127.0.0.1")),6000);
+	AddDestination(addr);
+	
 	m_InitializeFlag=true;
 	//LOG_DEBUG("Create RTP success, port is "<< Port);
 	printf("%ls%d\n", L"Create RTP success, port is ", Port);
@@ -109,7 +110,7 @@ void CRTPRecv::UnInitialize()
 
 	//关闭RTP
 	BYEDestroy(RTPTime(RTP_BYE_DELAY_TIME,0), 0, 0);
-
+	WSACleanup();
 	m_pContext = NULL;
 	m_pCallBack = NULL;
 	m_pRTPRecvStatusUserData=NULL;
@@ -197,6 +198,8 @@ char* CRTPRecv::GetLocalIP()
 
 int CRTPRecv::InitRTP(int Port)
 {
+	WSADATA dat;
+	WSAStartup(MAKEWORD(2,2),&dat);
 	RTPUDPv4TransmissionParams TransParams;
 	RTPSessionParams SessionParams;
 

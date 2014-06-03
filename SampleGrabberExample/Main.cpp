@@ -12,7 +12,7 @@ int main()
 	hr = g_CaptureVideo.SetCrossbarProperty();
 	hr = g_CaptureVideo.SetSampleGrabberProperty();
 	hr = g_CaptureVideo.Start();
-	Sleep(60000);
+	Sleep(10000);
 	hr = g_CaptureVideo.Stop();
 	if (FAILED(hr))
 		ShowError(hr);

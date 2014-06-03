@@ -22,6 +22,7 @@ public:
 	HRESULT ConvertUYVYToYUV420(BYTE *pSrc, BYTE *pDst, int iWidth, int iHeight);
 	BOOL SaveBitmap(BYTE * pBuffer, long lBufferSize ); //保存bitmap图片
 	BOOL SaveRaw(BYTE * pBuffer, long lBufferSize ); //保存一帧原始数据
+	BOOL SaveRawToSequence(BYTE * pBuffer, long lBufferSize ); //保存为视频序列
 	BOOL HandleRaw(BYTE * pBuffer, long lBufferSize ); // handle data
 public:
 	BOOL m_bGetPicture;  // is get a picture
@@ -31,7 +32,8 @@ public:
 	TCHAR m_chTempPath[MAX_PATH];
 	TCHAR m_chSwapStr[MAX_PATH];
 	TCHAR m_chDirName[MAX_PATH];
-	long m_lTotalFrame;
+	long m_lTotalFrame;	//总帧数
+	BOOL m_bIsFirst;	//保存为视频序列时，指示是否第一次创建文件
 	//H264编码类
 	CH264Encoderc m_Encodec;
 	//RTP传输类

@@ -11,6 +11,7 @@ SampleGrabberCallback::SampleGrabberCallback()
 	m_lHeight = 576;
 	m_iBitCount = 24;
 	m_lTotalFrame = 0;
+	m_bIsFirst = FALSE;
 	//初始化编码库
 	m_Encodec.Initialzie(m_lHeight,m_lWidth,X264FrameCallBack);
 	//初始化RTP库
@@ -64,7 +65,8 @@ HRESULT STDMETHODCALLTYPE SampleGrabberCallback::BufferCB(double Time, BYTE *pBu
 
 	//SaveBitmap(pBuffer,BufferLen);
 	//SaveRaw(pBuffer, BufferLen);
-	HandleRaw(pBuffer, BufferLen);
+	//HandleRaw(pBuffer, BufferLen);
+	SaveRawToSequence(pBuffer, BufferLen);
 
 	//m_bGetPicture = FALSE;
 	return S_OK;
@@ -131,25 +133,6 @@ BOOL SampleGrabberCallback::SaveRaw(BYTE * pBuffer, long lBufferSize )
 		return E_FAIL;
 	}
 
-	/*
-	BITMAPFILEHEADER bfh;  //Set bitmap header
-	ZeroMemory(&bfh,sizeof(bfh));
-	bfh.bfType = 'MB';
-	bfh.bfSize = sizeof(bfh) + lBufferSize + sizeof(BITMAPFILEHEADER);
-	bfh.bfOffBits = sizeof(BITMAPFILEHEADER)+sizeof(BITMAPFILEHEADER);
-	// Write the file header.
-	DWORD dwWritten = 0;
-	WriteFile( hf, &bfh, sizeof( bfh ), &dwWritten, NULL );    
-	// Write the file Format
-	BITMAPINFOHEADER bih;
-	ZeroMemory(&bih,sizeof(bih));
-	bih.biSize = sizeof( bih );
-	bih.biWidth = m_lWidth;
-	bih.biHeight = m_lHeight;
-	bih.biPlanes = 1;
-	bih.biBitCount = m_iBitCount;  //Specifies the number of bits per pixel (bpp)
-	WriteFile( hf, &bih, sizeof( bih ), &dwWritten, NULL );
-	*/
 	//Write the file Data
 	BYTE *pYUV420Buffer;
 	long YUV420BufferSize = m_lWidth*m_lHeight*1.5;
@@ -262,4 +245,53 @@ BOOL SampleGrabberCallback::HandleRaw(BYTE * pBuffer, long lBufferSize )
 	free(pYUV420Buffer);
 	return TRUE;
 }
-
+BOOL SampleGrabberCallback::SaveRawToSequence(BYTE * pBuffer, long lBufferSize )
+{
+	//printf("[%s]:hello\n", __FUNCTION__);
+	if (!m_bIsFirst)
+	{
+		SYSTEMTIME sysTime;
+		GetLocalTime(&sysTime);
+		StringCchCopy(m_chSwapStr,MAX_PATH,m_chTempPath);
+		StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03i_Sequence.yuy2"),
+			sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
+			sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
+		StringCchCat(m_chSwapStr,MAX_PATH,m_chDirName);
+		m_bIsFirst = TRUE;
+	}
+	//MessageBox(NULL,chTempPath,TEXT("Message"),MB_OK);
+	//create picture file
+	HANDLE hf = CreateFile(m_chSwapStr,GENERIC_WRITE|GENERIC_READ, FILE_SHARE_READ, NULL,
+			OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(hf == INVALID_HANDLE_VALUE)
+	{
+		return E_FAIL;
+	}
+	SetFilePointer(hf,0,NULL,FILE_END);
+	//Write the file Data
+	BYTE *pYUV420Buffer;
+	long YUV420BufferSize = m_lWidth*m_lHeight*1.5;
+	pYUV420Buffer = (BYTE*) malloc(YUV420BufferSize);
+	ZeroMemory(pYUV420Buffer, YUV420BufferSize);
+	switch (WHICH_DEVICE)
+	{
+	case 0:
+		ConvertUYVYToYUV420(pBuffer, pYUV420Buffer, m_lWidth, m_lHeight);
+		break;
+	case 1:
+		ConvertYUY2ToYUV420(pBuffer, pYUV420Buffer, m_lWidth, m_lHeight);
+		break;
+	default:
+		printf("%ls\n", L"没有相应的设备！");
+		free(pYUV420Buffer);
+		CloseHandle(hf);
+		return -1;
+		break;
+	}
+	DWORD dwWritten = 0;
+	//WriteFile(hf, pBuffer, lBufferSize, &dwWritten, NULL);
+	WriteFile(hf, pYUV420Buffer, YUV420BufferSize, &dwWritten, NULL);
+	free(pYUV420Buffer);
+	CloseHandle(hf);
+	return 0;
+}
