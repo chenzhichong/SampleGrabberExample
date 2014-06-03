@@ -59,9 +59,6 @@
     <ClInclude Include="x264-RTP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="x264.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Main.h">
       <Filter>Header Files</Filter>
     </ClInclude>

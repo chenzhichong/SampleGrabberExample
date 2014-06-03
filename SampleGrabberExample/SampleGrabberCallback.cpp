@@ -55,7 +55,7 @@ HRESULT STDMETHODCALLTYPE SampleGrabberCallback::BufferCB(double Time, BYTE *pBu
 {
 	m_lTotalFrame++;
 	//CUYVY2BMP CUYVY2BMP(m_lWidth, m_lHeight);
-	
+
 	printf("[%s]:Frame[%d]\n", __FUNCTION__, m_lTotalFrame);
 	if(FALSE == m_bGetPicture)  //判断是否需要截图
 		return S_FALSE;
@@ -77,8 +77,8 @@ BOOL SampleGrabberCallback::SaveBitmap(BYTE * pBuffer, long lBufferSize )
 	GetLocalTime(&sysTime);
 	StringCchCopy(m_chSwapStr,MAX_PATH,m_chTempPath);
 	StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03ione.bmp"),
-					sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
-					sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
+		sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
+		sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
 	StringCchCat(m_chSwapStr,MAX_PATH,m_chDirName);
 	//MessageBox(NULL,chTempPath,TEXT("Message"),MB_OK);
 	//create picture file
@@ -119,8 +119,8 @@ BOOL SampleGrabberCallback::SaveRaw(BYTE * pBuffer, long lBufferSize )
 	GetLocalTime(&sysTime);
 	StringCchCopy(m_chSwapStr,MAX_PATH,m_chTempPath);
 	StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03ione.yuy2"),
-					sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
-					sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
+		sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
+		sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
 	StringCchCat(m_chSwapStr,MAX_PATH,m_chDirName);
 	//MessageBox(NULL,chTempPath,TEXT("Message"),MB_OK);
 	//create picture file
@@ -194,6 +194,37 @@ HRESULT SampleGrabberCallback::ConvertYUY2ToYUV420(BYTE *pSrc, BYTE *pDst, int i
 	}
 	return S_OK;
 }
+HRESULT SampleGrabberCallback::ConvertUYVYToYUV420(BYTE *pSrc, BYTE *pDst, int iWidth, int iHeight )
+{
+	if (!pDst && !pSrc)
+		return E_POINTER;
+	int iImgSize = iWidth * iHeight * 2;
+	int iWidthStep422 = iWidth * 2;
+
+	const BYTE* p422 = pSrc;
+	BYTE* p420y = pDst;
+	BYTE* p420u = pDst + iImgSize / 2; 
+	BYTE* p420v = p420u + iImgSize / 8;
+
+	for(int i = 0; i < iHeight; i += 2)
+	{
+		p422 = pSrc + i * iWidthStep422;
+		for(int j = 0; j < iWidthStep422; j+=4)
+		{
+			*(p420y++) = p422[j+1];
+			*(p420u++) = p422[j];
+			*(p420y++) = p422[j+3];
+		}
+		p422 += iWidthStep422;
+		for(int j = 0; j < iWidthStep422; j+=4)
+		{
+			*(p420y++) = p422[j+1];
+			*(p420v++) = p422[j+2];
+			*(p420y++) = p422[j+3];
+		}
+	}
+	return S_OK;
+}
 int SampleGrabberCallback::X264FrameCallBack(int FrameType, void *pData, int Length, void *pContext)
 {
 	printf("[%s:]%ls\n", __FUNCTION__, L"send x264!");
@@ -213,8 +244,22 @@ BOOL SampleGrabberCallback::HandleRaw(BYTE * pBuffer, long lBufferSize )
 	long YUV420BufferSize = m_lWidth*m_lHeight*1.5;
 	pYUV420Buffer = (BYTE*) malloc(YUV420BufferSize);
 	ZeroMemory(pYUV420Buffer, YUV420BufferSize);
-	ConvertYUY2ToYUV420(pBuffer, pYUV420Buffer, m_lWidth, m_lHeight);
+	switch (WHICH_DEVICE)
+	{
+	case 0:
+		ConvertUYVYToYUV420(pBuffer, pYUV420Buffer, m_lWidth, m_lHeight);
+		break;
+	case 1:
+		ConvertYUY2ToYUV420(pBuffer, pYUV420Buffer, m_lWidth, m_lHeight);
+		break;
+	default:
+		printf("%ls\n", L"没有相应的设备！");
+		free(pYUV420Buffer);
+		return S_FALSE;
+		break;
+	}
 	m_Encodec.InsertImageData(pYUV420Buffer, YUV420BufferSize);
+	free(pYUV420Buffer);
 	return TRUE;
 }
 

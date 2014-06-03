@@ -1,11 +1,15 @@
 #ifndef __COMMON_H__  
 #define __COMMON_H__  
 
+#define STRSAFE_NO_DEPRECATE
+#pragma warning ( disable : 4005 )
 #include <winsock2.h>
 #include <windows.h>
 #include <dshow.h>
 #include <dshowutil.h>
 #include <initguid.h>
+#include <iostream>
+using namespace std;
 #pragma include_alias( "dxtrans.h", "qedit.h" )
 #define __IDxtCompositor_INTERFACE_DEFINED__
 #define __IDxtAlphaSetter_INTERFACE_DEFINED__
@@ -13,17 +17,18 @@
 #define __IDxtKey_INTERFACE_DEFINED__
 #include "qedit.h"
 
+
 //log
 #include "GenewLog.h"
 #pragma comment (lib,"GenewLoggingService.lib")
 
 //jrtp lib
 #ifdef _DEBUG
-#pragma comment (lib, "../lib/RTP/Debug/jrtplib.lib")
-#pragma comment (lib, "../lib/RTP/Debug/jthread.lib")
+#pragma comment (lib, "RTP/Debug/jrtplib.lib")
+#pragma comment (lib, "RTP/Debug/jthread.lib")
 #else
-#pragma comment (lib, "../lib/RTP/Release/jrtplib.lib")
-#pragma comment (lib, "../lib/RTP/Release/jthread.lib")
+#pragma comment (lib, "RTP/Release/jrtplib.lib")
+#pragma comment (lib, "RTP/Release/jthread.lib")
 #endif
 
 #pragma comment(lib, "libav/avcodec.lib")
@@ -38,7 +43,7 @@ const wchar_t CAPTURE_DEVICE_VEDIO_PIN_IN_NAME[][64] = {L"Video Tuner In", L"Ä£Ä
 const wchar_t CAPTURE_DEVICE_VEDIO_PIN_OUT_NAME[][64] = {L"Capture Out", L"²¶»ñ"};
 const wchar_t CROSSBAR_DEVICE_PIN_OUT_NAME[][64] = {L"0: Video Decoder Out", L"0: Video Decoder Out"};
 
-const int WHICH_DEVICE = 1;
+const int WHICH_DEVICE = 0;
 
 // SMI Grabber Device
 DEFINE_GUID(CLSID_VideoCaptureSources,

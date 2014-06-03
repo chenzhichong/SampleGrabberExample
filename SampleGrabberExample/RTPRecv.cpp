@@ -211,7 +211,8 @@ int CRTPRecv::InitRTP(int Port)
 	if (Result < 0)
 	{
 		//LOG_ERROR("RTP: "<<RTPGetErrorString(Result));
-		printf("%ls\n", RTPGetErrorString(Result));
+		//printf("%ls\n", RTPGetErrorString(Result));
+		cout<<RTPGetErrorString(Result)<<endl;
 		return -1;
 	}
 	

@@ -96,7 +96,6 @@
     <ClInclude Include="RTPRecv.h" />
     <ClInclude Include="SampleGrabberCallback.h" />
     <ClInclude Include="x264-RTP.h" />
-    <ClInclude Include="x264.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

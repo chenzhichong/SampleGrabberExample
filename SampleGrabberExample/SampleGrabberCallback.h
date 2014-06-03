@@ -19,6 +19,7 @@ public:
 	static int X264FrameCallBack(int FrameType, void *pData, int Length, void *pContext);
 	static int RTPFrameCallBack(int FrameType, void *pData, int Length, void *pContext);
 	HRESULT ConvertYUY2ToYUV420(BYTE *pSrc, BYTE *pDst, int iWidth, int iHeight);
+	HRESULT ConvertUYVYToYUV420(BYTE *pSrc, BYTE *pDst, int iWidth, int iHeight);
 	BOOL SaveBitmap(BYTE * pBuffer, long lBufferSize ); //保存bitmap图片
 	BOOL SaveRaw(BYTE * pBuffer, long lBufferSize ); //保存一帧原始数据
 	BOOL HandleRaw(BYTE * pBuffer, long lBufferSize ); // handle data
