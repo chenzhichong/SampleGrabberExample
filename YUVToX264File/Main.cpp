@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	//±àÂë
-	int64_t i_pts = 0;
+	/*int64_t i_pts = 0;
 
 	x264_nal_t *nals;
 	int nnal;
@@ -100,6 +100,18 @@ int main(int argc, char *argv[]) {
 	    for (nal = nals; nal < nals + nnal; nal++) {
 			fwrite(nal->p_payload, nal->i_payload, 1, outf);
 	    }
+	}*/
+
+	x264_nal_t* nals;
+	int i_nals;
+	while (fread(yuv_buffer, yuv_size, 1, inf) > 0) {
+		int frame_size = x264_encoder_encode(encoder, &nals, &i_nals, &pic_in, &pic_out);
+		if (frame_size >= 0)
+		{
+			// OK
+			printf("good![%d]\n", nals->i_payload);
+			fwrite(nals->p_payload, nals->i_payload, 1, outf);
+		}
 	}
 
 	//clean
