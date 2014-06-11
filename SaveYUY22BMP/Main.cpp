@@ -51,14 +51,14 @@ int main(void)
 	if( fpr == NULL || fpw == NULL )
 	{
 		printf("can not read or write file\n");
-		fcloseall();
+		_fcloseall();
 		return 1;
 	}
 	fread( buf, READ_WRITE_FILE_SIZE, 1, fpr );
 	if(YUV422To420(buf,filebuf,176,144))printf("ok\n");
 	printf("size:%d",sizeof(filebuf));
 	fwrite( &filebuf, sizeof(filebuf), 1, fpw );
-	fcloseall();
+	_fcloseall();
 	return 0;
 }
 

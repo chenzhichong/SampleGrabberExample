@@ -7,10 +7,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SaveUYVY2BMP", "SaveUYVY2BM
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SaveYUY22BMP", "SaveYUY22BMP\SaveYUY22BMP.vcxproj", "{B51A9044-6275-49E9-B14B-706276682B8D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "x264Example", "x264Example\x264Example.vcxproj", "{6071785C-9C28-43E5-9A23-9AF6536AA2F2}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YUVToX264File", "YUVToX264File\YUVToX264File.vcxproj", "{8B1E6F35-CB2A-463B-AD6D-EFF06C060545}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -29,14 +25,6 @@ Global
 		{B51A9044-6275-49E9-B14B-706276682B8D}.Debug|Win32.Build.0 = Debug|Win32
 		{B51A9044-6275-49E9-B14B-706276682B8D}.Release|Win32.ActiveCfg = Release|Win32
 		{B51A9044-6275-49E9-B14B-706276682B8D}.Release|Win32.Build.0 = Release|Win32
-		{6071785C-9C28-43E5-9A23-9AF6536AA2F2}.Debug|Win32.ActiveCfg = Debug|Win32
-		{6071785C-9C28-43E5-9A23-9AF6536AA2F2}.Debug|Win32.Build.0 = Debug|Win32
-		{6071785C-9C28-43E5-9A23-9AF6536AA2F2}.Release|Win32.ActiveCfg = Release|Win32
-		{6071785C-9C28-43E5-9A23-9AF6536AA2F2}.Release|Win32.Build.0 = Release|Win32
-		{8B1E6F35-CB2A-463B-AD6D-EFF06C060545}.Debug|Win32.ActiveCfg = Debug|Win32
-		{8B1E6F35-CB2A-463B-AD6D-EFF06C060545}.Debug|Win32.Build.0 = Debug|Win32
-		{8B1E6F35-CB2A-463B-AD6D-EFF06C060545}.Release|Win32.ActiveCfg = Release|Win32
-		{8B1E6F35-CB2A-463B-AD6D-EFF06C060545}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

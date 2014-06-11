@@ -2,8 +2,6 @@
 #define __SAMPLEGRABBERCALLBACK_H__
 #include "common.h"
 #include "CUYVY2BMP.h"
-#include "H264Encoderc.h"
-#include "RTPRecv.h"
 
 class SampleGrabberCallback : public ISampleGrabberCB
 {
@@ -16,8 +14,6 @@ public:
 	HRESULT STDMETHODCALLTYPE BufferCB(double Time, BYTE *pBuffer, long BufferLen);
 	
 	SampleGrabberCallback();
-	static int X264FrameCallBack(int FrameType, void *pData, int Length, void *pContext);
-	static int RTPFrameCallBack(int FrameType, void *pData, int Length, void *pContext);
 	HRESULT ConvertYUY2ToYUV420(BYTE *pSrc, BYTE *pDst, int iWidth, int iHeight);
 	HRESULT ConvertUYVYToYUV420(BYTE *pSrc, BYTE *pDst, int iWidth, int iHeight);
 	BOOL SaveBitmap(BYTE * pBuffer, long lBufferSize ); //保存bitmap图片
@@ -34,10 +30,6 @@ public:
 	TCHAR m_chDirName[MAX_PATH];
 	long m_lTotalFrame;	//总帧数
 	BOOL m_bIsFirst;	//保存为视频序列时，指示是否第一次创建文件
-	//H264编码类
-	CH264Encoderc m_Encodec;
-	//RTP传输类
-	CRTPRecv m_RTPRecv;
 	//CUYVY2BMP m_CUYVY2BMP;
 };
 

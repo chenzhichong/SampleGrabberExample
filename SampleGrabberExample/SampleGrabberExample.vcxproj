@@ -82,20 +82,15 @@
     <ClCompile Include="CaptureVideo.cpp" />
     <ClCompile Include="common.cpp" />
     <ClCompile Include="CUYVY2BMP.cpp" />
-    <ClCompile Include="H264Encoderc.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="RTPRecv.cpp" />
     <ClCompile Include="SampleGrabberCallback.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CaptureVideo.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="CUYVY2BMP.h" />
-    <ClInclude Include="H264Encoderc.h" />
     <ClInclude Include="Main.h" />
-    <ClInclude Include="RTPRecv.h" />
     <ClInclude Include="SampleGrabberCallback.h" />
-    <ClInclude Include="x264-RTP.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

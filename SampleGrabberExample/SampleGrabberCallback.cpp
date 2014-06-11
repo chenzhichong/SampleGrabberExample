@@ -12,10 +12,6 @@ SampleGrabberCallback::SampleGrabberCallback()
 	m_iBitCount = 24;
 	m_lTotalFrame = 0;
 	m_bIsFirst = FALSE;
-	//初始化编码库
-	m_Encodec.Initialzie(m_lHeight,m_lWidth,X264FrameCallBack);
-	//初始化RTP库
-	m_RTPRecv.Initialize(RTP_RECV_PORT,RTPFrameCallBack);
 }
 
 ULONG STDMETHODCALLTYPE SampleGrabberCallback::AddRef()
@@ -208,19 +204,7 @@ HRESULT SampleGrabberCallback::ConvertUYVYToYUV420(BYTE *pSrc, BYTE *pDst, int i
 	}
 	return S_OK;
 }
-int SampleGrabberCallback::X264FrameCallBack(int FrameType, void *pData, int Length, void *pContext)
-{
-	printf("[%s:]%ls\n", __FUNCTION__, L"send x264!");
-	SampleGrabberCallback *pSGC = static_cast<SampleGrabberCallback*>(pContext);
-	//将本地编码的视频发送出去
-	pSGC->m_RTPRecv.SendH264Nalu((unsigned char*)pData,Length);
-	return 1;
-}
-int SampleGrabberCallback::RTPFrameCallBack(int FrameType, void *pData, int Length, void *pContext)
-{
-	printf("[%s:]%ls\n", __FUNCTION__, L"do nothing!");
-	return 1;
-}
+
 BOOL SampleGrabberCallback::HandleRaw(BYTE * pBuffer, long lBufferSize )
 {
 	BYTE *pYUV420Buffer;
@@ -241,7 +225,6 @@ BOOL SampleGrabberCallback::HandleRaw(BYTE * pBuffer, long lBufferSize )
 		return S_FALSE;
 		break;
 	}
-	m_Encodec.InsertImageData(pYUV420Buffer, YUV420BufferSize);
 	free(pYUV420Buffer);
 	return TRUE;
 }
@@ -253,7 +236,7 @@ BOOL SampleGrabberCallback::SaveRawToSequence(BYTE * pBuffer, long lBufferSize )
 		SYSTEMTIME sysTime;
 		GetLocalTime(&sysTime);
 		StringCchCopy(m_chSwapStr,MAX_PATH,m_chTempPath);
-		StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03i_Sequence.yuy2"),
+		StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03i_Sequence.yuv"),
 			sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
 			sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
 		StringCchCat(m_chSwapStr,MAX_PATH,m_chDirName);

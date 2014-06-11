@@ -422,7 +422,17 @@ HRESULT CaptureVideo::SetSampleGrabberProperty()
 	AM_MEDIA_TYPE mt;
 	ZeroMemory(&mt, sizeof(mt));
 	mt.majortype = MEDIATYPE_Video;
-	mt.subtype = MEDIASUBTYPE_YUY2;
+	switch (WHICH_DEVICE)
+	{
+	case 0:
+		mt.subtype = MEDIASUBTYPE_UYVY;
+		break;
+	case 1:
+		mt.subtype = MEDIASUBTYPE_YUY2;
+		break;
+	default:
+		break;
+	}
 
 	hr = m_pSampGrabber->SetMediaType(&mt);
 	if (FAILED(hr))
@@ -469,7 +479,6 @@ HRESULT CaptureVideo::Stop()
 	hr = m_pMediaControl->Stop();
 	return hr;
 }
-
 
 void CaptureVideo::CloseInterface()
 {
