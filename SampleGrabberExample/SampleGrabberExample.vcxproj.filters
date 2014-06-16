@@ -30,9 +30,6 @@
     <ClCompile Include="CUYVY2BMP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="H264Encoder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SampleGrabberCallback.h">
@@ -48,9 +45,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="H264Encoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
