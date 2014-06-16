@@ -236,9 +236,12 @@ BOOL SampleGrabberCallback::SaveRawToSequence(BYTE * pBuffer, long lBufferSize )
 		SYSTEMTIME sysTime;
 		GetLocalTime(&sysTime);
 		StringCchCopy(m_chSwapStr,MAX_PATH,m_chTempPath);
+		/*
 		StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03i_Sequence.yuv"),
 			sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
 			sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
+			*/
+		StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\Sequence.yuv"));
 		StringCchCat(m_chSwapStr,MAX_PATH,m_chDirName);
 		m_bIsFirst = TRUE;
 	}
