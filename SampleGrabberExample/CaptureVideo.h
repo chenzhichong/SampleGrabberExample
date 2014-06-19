@@ -36,6 +36,7 @@ private:
 	IBaseFilter *m_pSampGrabberFilter;
 	ISampleGrabber *m_pSampGrabber;
 	IBaseFilter *m_pRenderFilter;
+	IBaseFilter *m_pMPEG2EncoderFilter;
 	//IMediaEventEx *m_pMediaEvent;
 public:
 	//int m_nCaptureDeviceNumber;      //Device Count

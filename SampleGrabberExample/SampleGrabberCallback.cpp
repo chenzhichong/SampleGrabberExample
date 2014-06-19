@@ -2,7 +2,7 @@
 
 SampleGrabberCallback::SampleGrabberCallback()
 {
-	m_bGetPicture = TRUE;
+	m_bOneFrame = FALSE;
 	//Get template path
 	GetTempPath(MAX_PATH,m_chTempPath);
 	StringCchCat(m_chTempPath,MAX_PATH,TEXT("SGPic"));
@@ -11,7 +11,9 @@ SampleGrabberCallback::SampleGrabberCallback()
 	m_lHeight = 576;
 	m_iBitCount = 24;
 	m_lTotalFrame = 0;
-	m_bIsFirst = FALSE;
+	m_bIsFirst = TRUE;
+	m_Remain = 0;
+	m_CRTPSender.Initialize(DEST_PORT, DEST_IP);
 }
 
 ULONG STDMETHODCALLTYPE SampleGrabberCallback::AddRef()
@@ -54,17 +56,17 @@ HRESULT STDMETHODCALLTYPE SampleGrabberCallback::BufferCB(double Time, BYTE *pBu
 	//CUYVY2BMP CUYVY2BMP(m_lWidth, m_lHeight);
 
 	printf("[%s]:Frame[%d]\n", __FUNCTION__, m_lTotalFrame);
-	if(FALSE == m_bGetPicture)  //判断是否需要截图
-		return S_FALSE;
 	if(!pBuffer)
 		return E_POINTER;
-
+	if(TRUE == m_bOneFrame)  //判断是否需要dump一帧
+		SaveRaw(pBuffer, BufferLen);
 	//SaveBitmap(pBuffer,BufferLen);
 	//SaveRaw(pBuffer, BufferLen);
 	//HandleRaw(pBuffer, BufferLen);
-	SaveRawToSequence(pBuffer, BufferLen);
-
-	//m_bGetPicture = FALSE;
+	//SaveRawToSequence(pBuffer, BufferLen);
+	//SaveRawToTS(pBuffer, BufferLen);
+	SendTS(pBuffer, BufferLen);
+	m_bOneFrame = FALSE;
 	return S_OK;
 }
 
@@ -116,7 +118,7 @@ BOOL SampleGrabberCallback::SaveRaw(BYTE * pBuffer, long lBufferSize )
 	SYSTEMTIME sysTime;
 	GetLocalTime(&sysTime);
 	StringCchCopy(m_chSwapStr,MAX_PATH,m_chTempPath);
-	StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03ione.yuy2"),
+	StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03ione.raw"),
 		sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
 		sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
 	StringCchCat(m_chSwapStr,MAX_PATH,m_chDirName);
@@ -130,15 +132,18 @@ BOOL SampleGrabberCallback::SaveRaw(BYTE * pBuffer, long lBufferSize )
 	}
 
 	//Write the file Data
+	/*
 	BYTE *pYUV420Buffer;
 	long YUV420BufferSize = m_lWidth*m_lHeight*1.5;
 	pYUV420Buffer = (BYTE*) malloc(YUV420BufferSize);
 	ZeroMemory(pYUV420Buffer, YUV420BufferSize);
 	ConvertYUY2ToYUV420(pBuffer, pYUV420Buffer, m_lWidth, m_lHeight);
 	DWORD dwWritten = 0;
-	//WriteFile(hf, pBuffer, lBufferSize, &dwWritten, NULL);
 	WriteFile(hf, pYUV420Buffer, YUV420BufferSize, &dwWritten, NULL);
 	free(pYUV420Buffer);
+	*/
+	DWORD dwWritten = 0;
+	WriteFile(hf, pBuffer, lBufferSize, &dwWritten, NULL);
 	CloseHandle(hf);
 	return 0;
 }
@@ -280,4 +285,55 @@ BOOL SampleGrabberCallback::SaveRawToSequence(BYTE * pBuffer, long lBufferSize )
 	free(pYUV420Buffer);
 	CloseHandle(hf);
 	return 0;
+}
+BOOL SampleGrabberCallback::SaveRawToTS(BYTE * pBuffer, long lBufferSize )
+{
+	//printf("[%s]:hello\n", __FUNCTION__);
+	if (m_bIsFirst)
+	{
+		SYSTEMTIME sysTime;
+		GetLocalTime(&sysTime);
+		StringCchCopy(m_chSwapStr,MAX_PATH,m_chTempPath);
+		/*
+		StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03i_Sequence.yuv"),
+			sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
+			sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
+			*/
+		StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\Sequence.ts"));
+		StringCchCat(m_chSwapStr,MAX_PATH,m_chDirName);
+		m_bIsFirst = FALSE;
+	}
+	//MessageBox(NULL,chTempPath,TEXT("Message"),MB_OK);
+	//create picture file
+	HANDLE hf = CreateFile(m_chSwapStr,GENERIC_WRITE|GENERIC_READ, FILE_SHARE_READ, NULL,
+			OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(hf == INVALID_HANDLE_VALUE)
+	{
+		return E_FAIL;
+	}
+	SetFilePointer(hf,0,NULL,FILE_END);
+	
+	DWORD dwWritten = 0;
+	WriteFile(hf, pBuffer, lBufferSize, &dwWritten, NULL);
+	CloseHandle(hf);
+	return 0;
+}
+void SampleGrabberCallback::SendTS(BYTE * pBuffer, long lBufferSize)
+{
+	int iLen = TS_PACKET_SIZE*RTP_TS_PACKET_COUNT;
+	long lActualSize = m_Remain ? lBufferSize-(TS_PACKET_SIZE-m_Remain) : lBufferSize;
+	if (lActualSize != lBufferSize)
+	{
+		memcpy(m_RD, pBuffer, TS_PACKET_SIZE-m_Remain);
+		m_CRTPSender.Send(m_RD, TS_PACKET_SIZE);
+	}
+	int iCount = lActualSize/iLen;
+	int iRD = lActualSize%iLen;
+	//先发送7
+	for(int i = 0; i < iCount; i++)
+	{
+		m_CRTPSender.Send(pBuffer+i*iLen, iLen);
+	}
+	//剩下的
+	
 }

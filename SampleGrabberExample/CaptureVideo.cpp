@@ -148,6 +148,21 @@ HRESULT CaptureVideo::InitializeEnv()
 		return hr;
 	}
 
+	//add Microsoft MPEG-2 Encoder
+	hr = CoCreateInstance(CLSID_CMPEG2EncoderDS, NULL, CLSCTX_INPROC_SERVER,
+		IID_IBaseFilter, (LPVOID*)&m_pMPEG2EncoderFilter);
+	if(FAILED(hr))
+	{
+		printf("´´½¨Microsoft MPEG-2 Encoder FilterÊ§°Ü£¡\n");
+		return hr;
+	}
+	hr = m_pGraphBuilder->AddFilter(m_pMPEG2EncoderFilter, L"Microsoft MPEG-2 Encoder");
+	if(FAILED(hr))
+	{
+		printf("Ìí¼ÓMicrosoft MPEG-2 Encoder FilterÊ§°Ü£¡\n");
+		return hr;
+	} 
+
 	//add SampleGrabber
 	hr = CoCreateInstance(CLSID_SampleGrabber, NULL, CLSCTX_INPROC_SERVER,
 		IID_IBaseFilter, (LPVOID*)&m_pSampGrabberFilter);
@@ -167,7 +182,14 @@ HRESULT CaptureVideo::InitializeEnv()
 	{
 		printf("²éÑ¯ISampleGrabber½Ó¿ÚÊ§°Ü£¡\n");
 		return hr;
-	}	
+	}
+	//set mt
+	hr = SetSampleGrabberProperty();
+	if (FAILED(hr))
+	{
+		printf("SetSampleGrabberProperty Ê§°Ü£¡\n");
+		return hr;
+	}
 
 	//add Null Renderer
 	hr = CoCreateInstance(CLSID_NullRenderer, NULL, CLSCTX_INPROC_SERVER,
@@ -210,11 +232,59 @@ HRESULT CaptureVideo::InitializeEnv()
 	SafeRelease(&pPinOut);
 	SafeRelease(&pPinIn);
 
-	//connect SMI Grabber Device and SampleGrabber
+	//connect SMI Grabber Device and Microsoft MPEG-2 Encoder [Video]
 	hr = GetPin(m_pGrabberDevFilter,CAPTURE_DEVICE_VEDIO_PIN_OUT_NAME[WHICH_DEVICE], &pPinOut);
 	if(FAILED(hr))
 	{
 		printf("GetPin[%ls:%ls]Ê§°Ü£¡\n", CAPTURE_DEVICE_NAME[WHICH_DEVICE], CAPTURE_DEVICE_VEDIO_PIN_OUT_NAME[WHICH_DEVICE]);
+		return hr;
+	}
+	hr = GetPin(m_pMPEG2EncoderFilter, L"Input0", &pPinIn);
+	if(FAILED(hr))
+	{
+		printf("GetPin[%ls:%ls]Ê§°Ü£¡\n", L"Microsoft MPEG-2 Encoder", L"Input0");
+		return hr;
+	}
+	hr = m_pGraphBuilder->ConnectDirect(pPinOut, pPinIn, NULL);
+	if(FAILED(hr))
+	{
+		printf("Á¬½ÓÊ§°Ü£¡\n");
+		SafeRelease(&pPinOut);
+		SafeRelease(&pPinIn);
+		return hr;
+	}
+	SafeRelease(&pPinOut);
+	SafeRelease(&pPinIn);
+
+	//connect SMI Grabber Device and Microsoft MPEG-2 Encoder [Audio]
+	hr = GetPin(m_pGrabberDevFilter,CAPTURE_DEVICE_AUDIO_PIN_OUT_NAME[WHICH_DEVICE], &pPinOut);
+	if(FAILED(hr))
+	{
+		printf("GetPin[%ls:%ls]Ê§°Ü£¡\n", CAPTURE_DEVICE_NAME[WHICH_DEVICE], CAPTURE_DEVICE_AUDIO_PIN_OUT_NAME[WHICH_DEVICE]);
+		return hr;
+	}
+	hr = GetPin(m_pMPEG2EncoderFilter, L"Input1", &pPinIn);
+	if(FAILED(hr))
+	{
+		printf("GetPin[%ls:%ls]Ê§°Ü£¡\n", L"Microsoft MPEG-2 Encoder", L"Input1");
+		return hr;
+	}
+	hr = m_pGraphBuilder->ConnectDirect(pPinOut, pPinIn, NULL);
+	if(FAILED(hr))
+	{
+		printf("Á¬½ÓÊ§°Ü£¡\n");
+		SafeRelease(&pPinOut);
+		SafeRelease(&pPinIn);
+		return hr;
+	}
+	SafeRelease(&pPinOut);
+	SafeRelease(&pPinIn);
+
+	//connect Microsoft MPEG-2 Encoder and SampleGrabber
+	hr = GetPin(m_pMPEG2EncoderFilter, L"Output", &pPinOut);
+	if(FAILED(hr))
+	{
+		printf("GetPin[%ls:%ls]Ê§°Ü£¡\n", L"Microsoft MPEG-2 Encoder", L"Output");
 		return hr;
 	}
 	hr = GetPin(m_pSampGrabberFilter, L"Input", &pPinIn);
@@ -231,6 +301,14 @@ HRESULT CaptureVideo::InitializeEnv()
 		SafeRelease(&pPinIn);
 		return hr;
 	}
+//	AM_MEDIA_TYPE mt, *pmt;
+//	ZeroMemory(&mt, sizeof(mt));
+//	pmt = &mt;
+//	GetPinMediaType(pPinOut, MEDIATYPE_Stream, MEDIASUBTYPE_MPEG2_TRANSPORT, GUID_NULL, &pmt);
+//	pPinOut->QueryAccept(pmt);
+//	m_pGraphBuilder->Reconnect(pPinOut);
+//	pPinOut->ConnectionMediaType(pmt);
+//	FreeMediaType(mt);
 	SafeRelease(&pPinOut);
 	SafeRelease(&pPinIn);
 
@@ -421,6 +499,7 @@ HRESULT CaptureVideo::SetSampleGrabberProperty()
 
 	AM_MEDIA_TYPE mt;
 	ZeroMemory(&mt, sizeof(mt));
+	/*
 	mt.majortype = MEDIATYPE_Video;
 	switch (WHICH_DEVICE)
 	{
@@ -433,13 +512,17 @@ HRESULT CaptureVideo::SetSampleGrabberProperty()
 	default:
 		break;
 	}
-
+	*/
+	mt.majortype = MEDIATYPE_Stream;
+	mt.subtype = MEDIASUBTYPE_MPEG2_TRANSPORT;
 	hr = m_pSampGrabber->SetMediaType(&mt);
 	if (FAILED(hr))
 	{
 		printf("ÉèÖÃsample¸ñÊ½Ê§°Ü£¡");
+		FreeMediaType(mt);
 		return hr;
 	}
+	FreeMediaType(mt);
 	hr = m_pSampGrabber->SetBufferSamples(TRUE);
 	if (FAILED(hr))
 	{
