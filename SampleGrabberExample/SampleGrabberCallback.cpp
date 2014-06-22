@@ -65,7 +65,7 @@ HRESULT STDMETHODCALLTYPE SampleGrabberCallback::BufferCB(double Time, BYTE *pBu
 	//HandleRaw(pBuffer, BufferLen);
 	//SaveRawToSequence(pBuffer, BufferLen);
 	//SaveRawToTS(pBuffer, BufferLen);
-	SendTS(pBuffer, BufferLen);
+	//SendTS(pBuffer, BufferLen);
 	m_bOneFrame = FALSE;
 	return S_OK;
 }
@@ -243,9 +243,9 @@ BOOL SampleGrabberCallback::SaveRawToSequence(BYTE * pBuffer, long lBufferSize )
 		StringCchCopy(m_chSwapStr,MAX_PATH,m_chTempPath);
 		/*
 		StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03i_Sequence.yuv"),
-			sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
-			sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
-			*/
+		sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
+		sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
+		*/
 		StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\Sequence.yuv"));
 		StringCchCat(m_chSwapStr,MAX_PATH,m_chDirName);
 		m_bIsFirst = TRUE;
@@ -253,7 +253,7 @@ BOOL SampleGrabberCallback::SaveRawToSequence(BYTE * pBuffer, long lBufferSize )
 	//MessageBox(NULL,chTempPath,TEXT("Message"),MB_OK);
 	//create picture file
 	HANDLE hf = CreateFile(m_chSwapStr,GENERIC_WRITE|GENERIC_READ, FILE_SHARE_READ, NULL,
-			OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(hf == INVALID_HANDLE_VALUE)
 	{
 		return E_FAIL;
@@ -296,9 +296,9 @@ BOOL SampleGrabberCallback::SaveRawToTS(BYTE * pBuffer, long lBufferSize )
 		StringCchCopy(m_chSwapStr,MAX_PATH,m_chTempPath);
 		/*
 		StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\%04i%02i%02i%02i%02i%02i%03i_Sequence.yuv"),
-			sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
-			sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
-			*/
+		sysTime.wYear,sysTime.wMonth,sysTime.wDay,sysTime.wHour,
+		sysTime.wMinute,sysTime.wSecond,sysTime.wMilliseconds);
+		*/
 		StringCchPrintf(m_chDirName,MAX_PATH,TEXT("\\Sequence.ts"));
 		StringCchCat(m_chSwapStr,MAX_PATH,m_chDirName);
 		m_bIsFirst = FALSE;
@@ -306,13 +306,13 @@ BOOL SampleGrabberCallback::SaveRawToTS(BYTE * pBuffer, long lBufferSize )
 	//MessageBox(NULL,chTempPath,TEXT("Message"),MB_OK);
 	//create picture file
 	HANDLE hf = CreateFile(m_chSwapStr,GENERIC_WRITE|GENERIC_READ, FILE_SHARE_READ, NULL,
-			OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(hf == INVALID_HANDLE_VALUE)
 	{
 		return E_FAIL;
 	}
 	SetFilePointer(hf,0,NULL,FILE_END);
-	
+
 	DWORD dwWritten = 0;
 	WriteFile(hf, pBuffer, lBufferSize, &dwWritten, NULL);
 	CloseHandle(hf);
@@ -321,19 +321,40 @@ BOOL SampleGrabberCallback::SaveRawToTS(BYTE * pBuffer, long lBufferSize )
 void SampleGrabberCallback::SendTS(BYTE * pBuffer, long lBufferSize)
 {
 	int iLen = TS_PACKET_SIZE*RTP_TS_PACKET_COUNT;
+	int iPos = 0;
 	long lActualSize = m_Remain ? lBufferSize-(TS_PACKET_SIZE-m_Remain) : lBufferSize;
 	if (lActualSize != lBufferSize)
 	{
-		memcpy(m_RD, pBuffer, TS_PACKET_SIZE-m_Remain);
+		memcpy(m_RD+m_Remain, pBuffer, TS_PACKET_SIZE-m_Remain);
 		m_CRTPSender.Send(m_RD, TS_PACKET_SIZE);
+		//定位下一帧47的位置
+		iPos = TS_PACKET_SIZE-m_Remain;
 	}
+
 	int iCount = lActualSize/iLen;
 	int iRD = lActualSize%iLen;
-	//先发送7
+	//先发送7倍的包
 	for(int i = 0; i < iCount; i++)
 	{
-		m_CRTPSender.Send(pBuffer+i*iLen, iLen);
+		m_CRTPSender.Send(pBuffer+iPos, iLen);
+		iPos += iLen;
 	}
 	//剩下的
-	
+	if (iRD)
+	{
+		lActualSize = lActualSize - iCount*iLen;
+		iCount = lActualSize/TS_PACKET_SIZE;
+		m_CRTPSender.Send(pBuffer+iPos, iCount*TS_PACKET_SIZE);
+		iPos += iCount*TS_PACKET_SIZE;
+		iRD = lActualSize%TS_PACKET_SIZE;
+		if (iRD)
+		{
+			memcpy(m_RD, pBuffer+iPos, iRD);
+			m_Remain = iRD;
+		} else
+		{
+			memset(m_RD, 0, TS_PACKET_SIZE);
+			m_Remain = 0;
+		}
+	}
 }

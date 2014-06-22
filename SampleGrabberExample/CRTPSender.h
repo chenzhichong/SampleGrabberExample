@@ -102,6 +102,7 @@ protected:
 	BOOL InitWinsock();
 	BOOL Uninitialize();
 	BOOL FillRTPHeader();
+	int DumpRaw(BYTE *buf, int len);
 private:
 	BOOL m_InitFlag;
 	SOCKET m_Socket;

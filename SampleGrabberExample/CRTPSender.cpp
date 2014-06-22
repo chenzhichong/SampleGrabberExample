@@ -99,8 +99,18 @@ BOOL CRTPSender::InitWinsock()
 int CRTPSender::Send(BYTE *buf, int len)
 {
 	char sendBuf[MTU];
+	//DumpRaw(buf, len);
 	m_RTPHeader.seq_no++;
 	memcpy(sendBuf, &m_RTPHeader, sizeof(RTP_FIXED_HEADER));
 	memcpy(sendBuf+sizeof(RTP_FIXED_HEADER), buf, len);
 	return send(m_Socket, sendBuf, sizeof(RTP_FIXED_HEADER)+len, 0);
+}
+int CRTPSender::DumpRaw(BYTE *buf, int len)
+{
+	int iRet;
+	FILE *File;
+	File = fopen("dump.dat", "ab+");
+	iRet = fwrite(buf, len, 1, File);
+	fclose(File);
+	return iRet;
 }
