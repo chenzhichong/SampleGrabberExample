@@ -65,7 +65,7 @@ HRESULT STDMETHODCALLTYPE SampleGrabberCallback::BufferCB(double Time, BYTE *pBu
 	//HandleRaw(pBuffer, BufferLen);
 	//SaveRawToSequence(pBuffer, BufferLen);
 	//SaveRawToTS(pBuffer, BufferLen);
-	//SendTS(pBuffer, BufferLen);
+	SendTS(pBuffer, BufferLen);
 	m_bOneFrame = FALSE;
 	return S_OK;
 }

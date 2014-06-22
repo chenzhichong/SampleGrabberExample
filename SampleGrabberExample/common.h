@@ -15,16 +15,17 @@
 #include "qedit.h"
 
 //设备名称
-const wchar_t CAPTURE_DEVICE_NAME[][64] = {L"SMI Grabber Device", L"AVerMedia 7231 Analog Capture"};
-const wchar_t CROSSBAR_DEVICE_NAME[][64] = {L"SM BDA Crossbar Filter", L"AVerMedia 7231 Analog Xbar"};
-const wchar_t CAPTURE_DEVICE_VEDIO_PIN_IN_NAME[][64] = {L"Video Tuner In", L"模拟视频输入"};
-const wchar_t CAPTURE_DEVICE_VEDIO_PIN_OUT_NAME[][64] = {L"Capture Out", L"捕获"};
-const wchar_t CAPTURE_DEVICE_AUDIO_PIN_OUT_NAME[][64] = {L"Audio PCM Out", L".."};
-const wchar_t CROSSBAR_DEVICE_PIN_OUT_NAME[][64] = {L"0: Video Decoder Out", L"0: Video Decoder Out"};
+const wchar_t CROSSBAR_DEVICE_NAME[][64] = {L"SM BDA Crossbar Filter", L"AVerMedia 7231 Analog Xbar", L"Conexant 23885 Crossbar"};
+const wchar_t CROSSBAR_DEVICE_PIN_OUT_NAME[][64] = {L"0: Video Decoder Out", L"0: Video Decoder Out", L"0: Video Decoder Out"};
+const wchar_t CAPTURE_DEVICE_NAME[][64] = {L"SMI Grabber Device", L"AVerMedia 7231 Analog Capture", L"Analog TV"};
+const wchar_t CAPTURE_DEVICE_VEDIO_PIN_IN_NAME[][64] = {L"Video Tuner In", L"模拟视频输入", L"模拟视频输入"};
+const wchar_t CAPTURE_DEVICE_VEDIO_PIN_OUT_NAME[][64] = {L"Capture Out", L"捕获", L"捕获"};
+const wchar_t CAPTURE_DEVICE_AUDIO_PIN_OUT_NAME[][64] = {L"Audio PCM Out", L"Audio Out", L"Audio Out"};
 
-const int WHICH_DEVICE = 0;
 
-#define DEST_IP                "127.0.0.1"
+const int WHICH_DEVICE = 2;
+
+#define DEST_IP                "192.168.1.106"
 #define DEST_PORT				12306
 
 // SMI Grabber Device
