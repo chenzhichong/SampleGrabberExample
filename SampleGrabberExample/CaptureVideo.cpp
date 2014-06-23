@@ -156,6 +156,39 @@ HRESULT CaptureVideo::InitializeEnv()
 		printf("´´½¨Microsoft MPEG-2 Encoder FilterÊ§°Ü£¡\n");
 		return hr;
 	}
+	/*
+	ICodecAPI * pCodecAPI;
+	VARIANT value;
+	VariantInit(&value);
+	hr = m_pMPEG2EncoderFilter->QueryInterface(IID_ICodecAPI, (LPVOID*)&pCodecAPI);
+	
+	hr = pCodecAPI->GetValue(&CODECAPI_AVEncMPVProfile, &value);
+	value.lVal = 1;
+	hr = pCodecAPI->SetValue(&CODECAPI_AVEncMPVProfile, &value);
+
+	hr = pCodecAPI->GetValue(&CODECAPI_AVEncMPVLevel, &value);
+	value.lVal = 2;
+	hr = pCodecAPI->SetValue(&CODECAPI_AVEncMPVLevel, &value);
+
+	hr = pCodecAPI->GetValue(&CODECAPI_AVEncInputVideoSystem, &value);
+	value.lVal = 1;
+	hr = pCodecAPI->SetValue(&CODECAPI_AVEncInputVideoSystem, &value);
+
+	hr = pCodecAPI->GetValue(&CODECAPI_AVEncCommonRateControlMode, &value);
+	value.lVal = 0;
+	hr = pCodecAPI->SetValue(&CODECAPI_AVEncCommonRateControlMode, &value);
+	
+	hr = pCodecAPI->GetValue(&CODECAPI_AVEncCommonQualityVsSpeed, &value);
+	value.lVal = 0;
+	hr = pCodecAPI->SetValue(&CODECAPI_AVEncCommonQualityVsSpeed, &value);
+	
+	hr = pCodecAPI->GetValue(&CODECAPI_AVEncCommonMeanBitRate, &value);
+	value.lVal = 15552000;
+	hr = pCodecAPI->SetValue(&CODECAPI_AVEncCommonMeanBitRate, &value);
+	
+	VariantClear(&value);
+	hr = pCodecAPI->Release();
+	*/
 	hr = m_pGraphBuilder->AddFilter(m_pMPEG2EncoderFilter, L"Microsoft MPEG-2 Encoder");
 	if(FAILED(hr))
 	{

@@ -7,6 +7,8 @@
 #include <dshowutil.h>
 #include <initguid.h>
 #include <wmcodecdsp.h>
+#include <Ks.h>
+#include <Codecapi.h>
 #pragma include_alias( "dxtrans.h", "qedit.h" )
 #define __IDxtCompositor_INTERFACE_DEFINED__
 #define __IDxtAlphaSetter_INTERFACE_DEFINED__
@@ -23,7 +25,7 @@ const wchar_t CAPTURE_DEVICE_VEDIO_PIN_OUT_NAME[][64] = {L"Capture Out", L"²¶»ñ"
 const wchar_t CAPTURE_DEVICE_AUDIO_PIN_OUT_NAME[][64] = {L"Audio PCM Out", L"Audio Out", L"Audio Out"};
 
 
-const int WHICH_DEVICE = 2;
+const int WHICH_DEVICE = 0;
 
 #define DEST_IP                "192.168.1.106"
 #define DEST_PORT				12306
